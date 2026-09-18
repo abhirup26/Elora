@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}{% endblock %}{{ ' · ' if self.title() else '' }}Elara — AI Saree Studio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥻</text></svg>">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav container">
+      <a class="brand" href="/">
+        <span class="brand-mark">E</span>
+        <span class="brand-text">El<em>ara</em></span>
+      </a>
+      <button class="nav-toggle" id="navToggle" aria-label="Menu">☰</button>
+      <div class="nav-links" id="navLinks">
+        <a href="/" class="{{ 'active' if request.path == '/' }}">Home</a>
+        <a href="/collection" class="{{ 'active' if request.path.startswith('/collection') or request.path.startswith('/saree') }}">Collection</a>
+        <a href="/stylist" class="{{ 'active' if request.path.startswith('/stylist') }}">AI Stylist</a>
+        <a href="/body-type" class="{{ 'active' if request.path.startswith('/body-type') }}">Body Type</a>
+        <a href="/customize" class="nav-cta {{ 'active' if request.path.startswith('/customize') }}">Customize</a>
+      </div>
+    </nav>
+  </header>
+
+  <main>{% block content %}{% endblock %}</main>
+
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <div>
+        <div class="brand-text footer-brand">El<em>ara</em></div>
+        <p>Hand-picked sarees, honest material notes, and an AI stylist<br>that pairs your couple belts with your drape.</p>
+      </div>
+      <div>
+        <h5>Explore</h5>
+        <a href="/collection">Collection</a>
+        <a href="/stylist">AI Stylist</a>
+        <a href="/body-type">Body Type Guide</a>
+        <a href="/customize">Customization Studio</a>
+      </div>
+      <div>
+        <h5>Visit</h5>
+        <p>12 Handloom Lane, Kolkata<br>Tue–Sun · 11 am – 8 pm</p>
+      </div>
+    </div>
+    <div class="container footer-base">© 2026 Elara · Crafted with 🥻 and a RandomForest</div>
+  </footer>
+
+  <div id="toast" class="toast" role="status"></div>
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

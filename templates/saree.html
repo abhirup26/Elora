@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}{{ saree.name }}{% endblock %}
+{% block content %}
+<section class="page-head" style="padding-bottom: 30px;">
+  <div class="container">
+    <div class="crumbs"><a href="/collection">Collection</a> › <a href="/collection?category={{ saree.category }}">{{ CATEGORIES | selectattr('key', 'equalto', saree.category) | map(attribute='label') | first }}</a> › {{ saree.name }}</div>
+    <div class="detail-grid">
+      <div class="detail-media">
+        {% if saree.img.kind == 'photo' %}
+        <figure class="detail-figure">
+          <img class="detail-img" src="{{ saree.img.url }}" alt="{{ saree.name }} — {{ saree.material }} saree">
+          {% if saree.img.credit %}<figcaption class="design-cap">📷 {{ saree.img.credit }}</figcaption>{% endif %}
+        </figure>
+        {% endif %}
+        <figure class="detail-figure">
+          <img class="detail-img" src="/static/designs/saree-{{ saree.id }}.svg" alt="{{ saree.name }} — draped in {{ saree.material }}, {{ saree.design }}">
+          <figcaption class="design-cap">✦ Draped: {{ saree.design }} · {{ saree.material }}</figcaption>
+        </figure>
+      </div>
+      <div>
+        <span class="mat-tag">{{ saree.material }}</span>
+        <h1 style="font-size: clamp(30px, 3.6vw, 44px); margin: 8px 0 6px;">{{ saree.name }}</h1>
+        <p class="lead" style="color: var(--ink-soft); margin-bottom: 14px;">{{ saree.blurb }}</p>
+        <div class="price" style="font-size: 24px; margin-bottom: 10px;"><span class="rupee">₹</span>{{ "{:,}".format(saree.price) }}</div>
+        <div class="mat-row">
+          <span class="chip" style="cursor: default; border-color: var(--gold);">Material: <b>&nbsp;{{ saree.material }}</b></span>
+          <span class="chip" style="cursor: default;">Craft: <b>&nbsp;{{ saree.design }}</b></span>
+        </div>
+        <div class="designer-note" style="margin: 16px 0 18px;">
+          <b class="serif" style="font-size: 18px;">Designer's note</b>
+          <p style="font-size: 14.5px; color: var(--ink-soft); margin-top: 4px;">{{ saree.design|capitalize }}, woven in {{ saree.material }} — {{ saree.material_info.best_for }}.</p>
+        </div>
+        <div class="note-grid">
+          <div class="note-cell"><b>Feel</b>{{ saree.material_info.feel }}</div>
+          <div class="note-cell"><b>Drape</b>{{ saree.material_info.drape }}</div>
+          <div class="note-cell"><b>Season</b>{{ saree.material_info.season }}</div>
+          <div class="note-cell"><b>Care</b>{{ saree.material_info.care }}</div>
+        </div>
+        <p class="material-note" style="margin: 14px 0 4px;"><b>Best for:</b> {{ saree.material_info.best_for }} · <b>Occasion:</b> {{ saree.occasion }}</p>
+        <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 22px;">
+          <a class="btn btn-primary" href="/stylist?saree={{ saree.id }}#pair-tool">Pair a couple belt</a>
+          <a class="btn btn-outline" href="/customize?saree={{ saree.id }}&item=blouse">Customise this look</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% if belt_pick %}
+<section class="section" style="padding-top: 0;">
+  <div class="container" style="max-width: 900px;">
+    <a class="rec-card top" href="/stylist?saree={{ saree.id }}#pair-tool">
+      <div class="belt-chip lg" style="--belt: {{ belt_pick.hex }};"></div>
+      <div style="flex: 1;">
+        <div class="serif" style="font-size: 20px;">AI stylist pick: the {{ belt_pick.name }} couple belt</div>
+        {% if belt_pick.why %}<div class="rec-why">{{ belt_pick.why[0] }}</div>{% endif %}
+      </div>
+      <div class="match-badge"><b>{{ "%.0f"|format(belt_pick.score * 10) }}%</b>match</div>
+    </a>
+  </div>
+</section>
+{% endif %}
+
+<section class="section" style="padding-top: 0;">
+  <div class="container">
+    <div class="section-head">
+      <div class="kicker">More in this mood</div>
+      <h2>Pair with</h2>
+    </div>
+    <div class="grid-3">
+      {% for s in related %}
+      <a class="card saree-card" href="/saree/{{ s.id }}">
+        <img class="saree-img" src="{{ s.img.url }}" alt="{{ s.name }} — {{ s.material }} saree" loading="lazy">
+        <div class="card-body">
+          <div class="saree-name">{{ s.name }}</div>
+          <span class="mat-tag">{{ s.material }}</span>
+          <div class="price"><span class="rupee">₹</span>{{ "{:,}".format(s.price) }}</div>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

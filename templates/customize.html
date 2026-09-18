@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% block title %}Customization Studio{% endblock %}
+{% block content %}
+<section class="page-head">
+  <div class="container">
+    <h1>✂️ Customization Studio</h1>
+    <p>Three independent tracks — each on its own page-like tab, so a blouse order never mixes with a belt order. Pricing updates live as you choose.</p>
+  </div>
+</section>
+
+<section class="section" style="padding-top: 26px;">
+  <div class="container" style="max-width: 940px;">
+
+    <div class="track-tabs" role="tablist">
+      {% for key, tr in pricing.items() %}
+      <button class="track-tab {{ 'active' if loop.first }}" data-track="{{ key }}" role="tab">{{ tr.label }}</button>
+      {% endfor %}
+    </div>
+
+    {% for key, tr in pricing.items() %}
+    <div class="track-pane {{ 'active' if loop.first }}" id="track-{{ key }}" data-base="{{ tr.base }}">
+      <div class="stylist-panel">
+        <p style="color: var(--ink-soft); margin-bottom: 22px;">{{ tr.desc }}</p>
+
+        {% for opt in tr.options %}
+        <div class="opt-group">
+          <label>{{ opt.label }}</label>
+          <div class="seg">
+            {% for ckey, clabel, add in opt.choices %}
+            <label><input type="radio" name="{{ key }}-{{ opt.key }}" value="{{ ckey }}"
+                    {% if (key == 'belt' and opt.key == 'shade' and ckey == 'stylist') or (loop.first and not (key == 'belt' and opt.key == 'shade')) %}checked{% endif %}
+                    data-add="{{ add }}"><span>{{ clabel }}</span>{% if add %}<span class="add">+₹{{ add }}</span>{% endif %}</label>
+            {% endfor %}
+          </div>
+        </div>
+        {% endfor %}
+
+        {% if key == 'belt' %}
+        <div class="field">
+          <label>Pair it with a saree <span style="text-transform:none; letter-spacing:0;">(optional — links your order to the stylist's pick)</span></label>
+          <select id="beltSaree" style="width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--line); font-family: var(--sans); font-size: 15px;">
+            <option value="">No specific saree</option>
+            {% for s in sarees %}<option value="{{ s.id }}">{{ s.name }}</option>{% endfor %}
+          </select>
+        </div>
+        {% endif %}
+
+        <div class="summary-bar">
+          <div>
+            <div class="total" id="price-{{ key }}">₹{{ "{:,}".format(tr.base) }}</div>
+            <div class="muted">live estimate · no payment now</div>
+          </div>
+          <div class="summary-fields">
+            <input type="text" placeholder="Your name" data-field="name" data-track="{{ key }}">
+            <input type="tel" placeholder="Phone number" data-field="phone" data-track="{{ key }}">
+            <button class="btn btn-gold" data-submit="{{ key }}">Send request</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.querySelectorAll('.track-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.track-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.track-pane').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('track-' + tab.dataset.track).classList.add('active');
+  });
+});
+
+function currentPrice(track) {
+  let price = Number(document.getElementById('track-' + track).dataset.base);
+  document.querySelectorAll('#track-' + track + ' input[type=radio]:checked').forEach(r => {
+    price += Number(r.dataset.add || 0);
+  });
+  return price;
+}
+
+function updatePrice(track) {
+  const el = document.getElementById('price-' + track);
+  if (el) el.textContent = '₹' + currentPrice(track).toLocaleString('en-IN');
+}
+
+document.querySelectorAll('.track-pane input[type=radio]').forEach(r =>
+  r.addEventListener('change', () => updatePrice(r.closest('.track-pane').id.replace('track-', ''))));
+
+document.querySelectorAll('[data-submit]').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    const track = btn.dataset.submit;
+    const pane = document.getElementById('track-' + track);
+    const name = pane.querySelector('[data-field=name]').value.trim();
+    const phone = pane.querySelector('[data-field=phone]').value.trim();
+    if (name.length < 2) { showToast('Please enter your name', true); return; }
+    if (phone.length < 8) { showToast('Please enter a valid phone number', true); return; }
+
+    const form = {};
+    pane.querySelectorAll('input[type=radio]:checked').forEach(r => {
+      form[r.name.replace(track + '-', '')] = r.value;
+    });
+    const payload = { item: track, name, phone, form };
+    if (track === 'belt') {
+      const sareeSel = document.getElementById('beltSaree');
+      if (sareeSel.value) payload.saree_id = Number(sareeSel.value);
+    }
+    btn.disabled = true;
+    try {
+      const d = await postJSON('/api/customize/request', payload);
+      showToast(`Request #${d.request_id} sent — ${d.track_label}, ₹${d.price.toLocaleString('en-IN')}. We'll call you.`);
+      pane.querySelectorAll('[data-field]').forEach(i => i.value = '');
+    } catch (e) { showToast(e.message, true); }
+    finally { btn.disabled = false; }
+  });
+});
+</script>
+{% endblock %}

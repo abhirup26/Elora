@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block content %}
+<section class="hero">
+  <div class="container hero-grid">
+    <div>
+      <span class="hero-kicker">AI-styled since 2026</span>
+      <h1>Every saree has a <em>moment</em>.<br>And a matching belt.</h1>
+      <p class="lead">Hand-picked sarees across party, puja, wedding and office wear — each with honest material notes, body-type draping advice from our AI stylist, and couple belts colour-matched by a trained model.</p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="/collection">Explore the Collection</a>
+        <a class="btn btn-gold" href="/stylist">✦ Ask the AI Stylist</a>
+      </div>
+    </div>
+    <div class="hero-fan" aria-hidden="true">
+      <img class="hero-fan-img fan-l" src="/static/designs/saree-2.svg" alt="Wine sequin chiffon saree design">
+      <img class="hero-fan-img fan-c" src="/static/designs/saree-7.svg" alt="Bridal Kanjivaram saree design">
+      <img class="hero-fan-img fan-r" src="/static/designs/saree-3.svg" alt="Emerald silk blend saree design">
+    </div>
+  </div>
+</section>
+
+<section class="section" style="padding-top: 10px;">
+  <div class="container">
+    <div class="section-head">
+      <div class="kicker">Shop by occasion</div>
+      <h2>Four categories, one aesthetic</h2>
+      <p>Every saree clearly labels its material — cotton, georgette, chiffon, organza blend, silk blend or pure silk — with care, drape and season notes.</p>
+    </div>
+    <div class="grid-4">
+      {% for c in CATEGORIES %}
+      <a class="card cat-card" href="/collection?category={{ c.key }}">
+        <div class="cat-icon">{{ c.icon }}</div>
+        <h3>{{ c.label }}</h3>
+        <p>{{ c.tagline }}</p>
+        <span class="btn btn-outline" style="padding: 9px 22px; font-size: 13.5px;">Browse →</span>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="section" style="background: var(--parchment); border-block: 1px solid var(--line);">
+  <div class="container">
+    <div class="section-head">
+      <div class="kicker">Fresh arrivals</div>
+      <h2>This week's drapes</h2>
+    </div>
+    <div class="grid-3">
+      {% for s in featured %}
+      <a class="card saree-card" href="/saree/{{ s.id }}">
+        <img class="saree-img" src="{{ s.img.url }}" alt="{{ s.name }} — draped {{ s.material }} saree" loading="lazy">
+        <div class="card-body">
+          <div class="saree-name">{{ s.name }}</div>
+          <span class="mat-tag">{{ s.material }}</span>
+          <div class="price"><span class="rupee">₹</span>{{ "{:,}".format(s.price) }}</div>
+          <p class="blurb">{{ s.blurb }}</p>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container grid-3">
+    <div class="card cat-card">
+      <div class="cat-icon">🤖</div>
+      <h3>Trained colour model</h3>
+      <p>Our stylist pairs your couple's belts to the saree with a RandomForest trained on 10,752 colour-theory-scored pairings.</p>
+      <a class="btn btn-outline" href="/stylist">Get a pairing</a>
+    </div>
+    <div class="card cat-card">
+      <div class="cat-icon">📐</div>
+      <h3>Body-type draping</h3>
+      <p>Enter three measurements and learn which material and drape flatter your frame — pear, apple, hourglass, rectangle or petite.</p>
+      <a class="btn btn-outline" href="/body-type">Find my drape</a>
+    </div>
+    <div class="card cat-card">
+      <div class="cat-icon">✂️</div>
+      <h3>Customization studio</h3>
+      <p>Pre-stitched blouses, saree fall &amp; pico, and couple belts — each customised on its own dedicated page with live pricing.</p>
+      <a class="btn btn-outline" href="/customize">Start customising</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

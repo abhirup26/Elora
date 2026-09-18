@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Collection{% endblock %}
+{% block content %}
+<section class="page-head">
+  <div class="container">
+    <h1>{% if active_category %}{{ active_category.icon }} {{ active_category.label }}{% else %}The Collection{% endif %}</h1>
+    <p>{% if active_category %}{{ active_category.tagline }}{% else %}Party, puja, wedding and office wear — filter by material to see how each drape behaves.{% endif %}</p>
+  </div>
+</section>
+
+<section class="section" style="padding-top: 22px;">
+  <div class="container">
+    <div class="chip-row">
+      <a class="chip {{ 'active' if not sel_category }}" href="/collection">All</a>
+      {% for c in CATEGORIES %}
+      <a class="chip {{ 'active' if sel_category == c.key }}" href="/collection?category={{ c.key }}">{{ c.icon }} {{ c.label }}</a>
+      {% endfor %}
+    </div>
+    <div class="chip-row" style="margin-top: -18px;">
+      <a class="chip {{ 'active' if not sel_material }}" href="?{% if sel_category %}category={{ sel_category }}{% endif %}">All materials</a>
+      {% for m in all_materials %}
+      <a class="chip {{ 'active' if sel_material == m }}" href="?{% if sel_category %}category={{ sel_category }}&amp;{% endif %}material={{ m }}">{{ m }}</a>
+      {% endfor %}
+    </div>
+
+    {% if sarees %}
+    <div class="grid-3">
+      {% for s in sarees %}
+      <a class="card saree-card" href="/saree/{{ s.id }}">
+        <img class="saree-img" src="{{ s.img.url }}" alt="{{ s.name }} — {{ s.material }} saree" loading="lazy">
+        <div class="card-body">
+          <div class="saree-name">{{ s.name }}</div>
+          <span class="mat-tag">{{ s.material }}</span>
+          <div class="price"><span class="rupee">₹</span>{{ "{:,}".format(s.price) }}</div>
+          <p class="blurb">{{ s.blurb }}</p>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="empty-note">No sarees match that combination — try another material.</p>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

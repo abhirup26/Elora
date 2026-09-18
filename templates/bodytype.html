@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}Body Type Guide{% endblock %}
+{% block content %}
+<section class="page-head">
+  <div class="container">
+    <h1>📐 Body Type Guide</h1>
+    <p>The AI maps your measurements to one of five silhouettes and tells you which materials and drapes will flatter it — with sarees from the collection that fit the bill.</p>
+  </div>
+</section>
+
+<section class="section" style="padding-top: 26px;">
+  <div class="container" style="max-width: 860px;">
+    <div class="stylist-panel">
+      <div class="field-row-3">
+        <div class="field"><label>Shoulders (in)</label><input type="number" id="shoulders" min="20" max="70" step="0.5" placeholder="e.g. 38"></div>
+        <div class="field"><label>Waist (in)</label><input type="number" id="waist" min="20" max="70" step="0.5" placeholder="e.g. 30"></div>
+        <div class="field"><label>Hips (in)</label><input type="number" id="hips" min="20" max="80" step="0.5" placeholder="e.g. 40"></div>
+      </div>
+      <div class="field" style="max-width: 320px;">
+        <label>Height (cm, optional)</label>
+        <input type="number" id="height" min="120" max="210" step="1" placeholder="e.g. 158">
+      </div>
+      <button class="btn btn-primary" id="btBtn" style="width: 100%; justify-content: center;">Find my drape</button>
+      <div class="stylist-result" id="btResult"></div>
+    </div>
+  </div>
+</section>
+
+<section class="section" style="padding-top: 0;">
+  <div class="container">
+    <div class="section-head">
+      <div class="kicker">Reference</div>
+      <h2>All five silhouettes</h2>
+    </div>
+    <div class="grid-3">
+      {% for key, bt in body_types.items() %}
+      <div class="card bt-card" style="padding: 24px;">
+        <h3>{{ bt.name }}</h3>
+        <div class="bt-traits">{{ bt.traits }}</div>
+        <p class="bt-advice">{{ bt.saree_advice }}</p>
+        <div class="bt-drape">✦ {{ bt.palette[0] }}</div>
+        <div style="margin-top: 12px;">
+          {% for m in bt.materials %}<span class="mat-tag">{{ m }}</span>{% endfor %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const btBtn = document.getElementById('btBtn');
+btBtn.addEventListener('click', async () => {
+  const payload = {
+    shoulders: document.getElementById('shoulders').value,
+    waist: document.getElementById('waist').value,
+    hips: document.getElementById('hips').value,
+    height: document.getElementById('height').value,
+  };
+  if (!payload.shoulders || !payload.waist || !payload.hips) { showToast('Fill shoulders, waist and hips', true); return; }
+  btBtn.disabled = true;
+  try {
+    const d = await postJSON('/api/stylist/body', payload);
+    const recs = d.suggested_sarees.map(s => `<a class="chip" style="margin: 4px 6px 0 0;" href="/saree/${s.id}">${s.name} · ${s.material}</a>`).join('');
+    document.getElementById('btResult').innerHTML = `
+      <div class="result-banner" style="margin-top: 24px;">
+        <h3>Your silhouette: ${d.name}</h3>
+        <p>${d.traits}</p>
+        <p style="margin-top: 8px;">${d.saree_advice}</p>
+        <div class="bt-drape">✦ ${d.draping}</div>
+        ${d.height_note ? `<p style="margin-top: 8px;"><b>Height note:</b> ${d.height_note}</p>` : ''}
+      </div>
+      <div style="margin-top: 18px;">
+        <b class="serif" style="font-size: 19px;">Flattering materials:</b>
+        ${d.materials.map(m => `<span class="mat-tag">${m}</span>`).join(' ')}
+      </div>
+      <div style="margin-top: 14px;">
+        <b class="serif" style="font-size: 19px;">Try these from the collection:</b><br>${recs}
+      </div>`;
+    document.getElementById('btResult').classList.add('show');
+  } catch (e) { showToast(e.message, true); }
+  finally { btBtn.disabled = false; }
+});
+</script>
+{% endblock %}
