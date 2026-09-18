@@ -1,1 +1,0 @@
-"""Elara — saree boutique with an AI stylist."""
